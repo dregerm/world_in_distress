@@ -136,11 +136,7 @@ with open('./data/lat_and_longitude.csv') as lat_and_long:
             only_country_names.append(row[3].lower())
             #countries_matrix[names.index(row[3].lower())].append([row[1],row[2]])
 
-#for item in countries_matrix:
-#    if len(item) ==  6:
-#        item.append([])
 
-#Series Name,Series Code,Country Name,Country Code,2005 [YR2005],2006 [YR2006],2007 [YR2007],2008 [YR2008],2009 [YR2009],2010 [YR2010],2011 [YR2011],2012 [YR2012],2013 [YR2013],2014 [YR2014],2015 [YR2015],2016 [YR2016],2017 [YR2017],2018 [YR2018],2019 [YR2019],2020 [YR2020]
 
 
 
@@ -281,7 +277,7 @@ def find_correlation(index1, index2, country):
 
             else: return None
 
-#divides country names into 'number_of_splits' splits that go from lowest gdp-highest gdp
+
 
 
 #returns the total gdp of a country
@@ -297,8 +293,7 @@ def total_gdp(country_name):
     return total_gdp
 
 
-    # % number_of_splits
-    # if 0... number_of_splits - 1
+
     
 #returns the mean of input_list
 def mean(input_list):
@@ -476,7 +471,6 @@ def column_value_levels(column, matrix):
     value_pairing = defaultdict(lambda: [])
 
     for country in matrix:
-        #print(country)
         all_values.append(country[column])
         
         value_pairing[country[column]].append(country)
@@ -530,10 +524,6 @@ def name_to_list(country_name,matrix):
 
 
         
-
-
-
-
 #within countries_matrix...
 #column 0 = name
 #column 1 = arable_land %
@@ -547,43 +537,13 @@ def name_to_list(country_name,matrix):
 #column 9 = renewable_energy_%_of_total
 #column 10 = agricultural_land_%
 
-show_correlation_plots(6,40)
-
-#show_correlation_plots(1,17)
-#would interesting to determine which mean differences are statistiaclly significant
-
-
-#test_matrix = create_column_value_levels(countries_matrix)
-#for country in test_matrix:
-    #if country[0] == 'united states':
-        #print(country)
-        
         
 
-#OKAY now every country is a set number...
-
-#did add total across years earlier because could just filter two columns. problem here is that
-#I need to have every column filtered which would not work because would be left with very little data...
-#so what I am doing is averaging each column and then am splitting each countries value into a grouping.
-
-
-
-
-#so i need the target array which is co2 levels..
-#and I need training array which is all the data...
-#so first lets make target aray...
-
-#clean_countries_on_column(10,new_array)
-
-
-
-
-#can make the model on the 
 model = MultinomialNB()
 new_array = create_column_value_levels(countries_matrix)
 
 
-#so for starters lets just use 5/6 of data as training data
+
 target_test_data = []
 testing_data = []
 training_data = []
@@ -646,7 +606,6 @@ for name in low_gdps:
         low_gdps_list.append(country_to_add)
         
 
-#creating the testing and training data...
 
 
 #FOR high GDP
@@ -692,7 +651,7 @@ f1 = 2 * (precision * recall) / (precision + recall)
 print('f1 score: ' + str(f1))
 
 
-#low
+#FOR low GDP
 print()
 print("LOW GDP MODEL")
 target_test_data = []
