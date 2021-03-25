@@ -218,7 +218,6 @@ for item in countries_matrix:
 #>>> analysis
 
 
-
 #this function will clean all columns based on if a '..' exists 
 #within column_index
 def clean_countries_on_column(column_index,matrix):
@@ -267,18 +266,49 @@ def find_correlation(index1, index2, country):
                     if value != first_val:
                         continue_on = True
                 first_val = item[index2][0]
+
                 for value in item[index2]:
                     if value != first_val:
                         continue_on2 = True
                 if(continue_on and continue_on2):
-                    correlation,_ = spearmanr(item[index1],item[index2])
+                    correlation,p_val = spearmanr(item[index1],item[index2])
+                    
                     return (correlation)
                 else: return None
 
             else: return None
 
+#creating this find_pval function is quite inefficient due to the fact that is simply same code
+#as find_correlation and could just return both correlation and p_val within find_correlation function
+#however, was getting an error "TypeError: cannot unpack non-iterable NoneType object" and can't really figure
+#out why is happening. so, instead of spending too much time on this, am deciding to just make a find_pval function.
+def find_pval(index1, index2, country):
+    new_matrix = make_copy(countries_matrix)
+    clean_countries_on_column(index1,new_matrix)
+    clean_countries_on_column(index2,new_matrix)
+    for item in new_matrix:
+        if item[0] == country:
+            
+            if(len(item[index1]) > 1 and len(item[index2]) > 1):
+                #making sure item[index1] and item[index2] are not constant arrays.
+                continue_on = False
+                continue_on2 = False
+                first_val = item[index1][0]
+                for value in item[index1]:
+                    if value != first_val:
+                        continue_on = True
+                first_val = item[index2][0]
 
+                for value in item[index2]:
+                    if value != first_val:
+                        continue_on2 = True
+                if(continue_on and continue_on2):
+                    correlation,p_val = spearmanr(item[index1],item[index2])
+                    
+                    return (p_val)
+                else: return None
 
+            else: return None
 
 #returns the total gdp of a country
 def total_gdp(country_name):
@@ -293,8 +323,6 @@ def total_gdp(country_name):
     return total_gdp
 
 
-
-    
 #returns the mean of input_list
 def mean(input_list):
     return sum(input_list)/len(input_list)
@@ -364,6 +392,76 @@ def divide_across_gdp(number_of_splits):
                 country_name = country_gdps[index]
             name_splits[i].append(country_name)
     return name_splits
+
+#shows plot of correlation and p_values between said column and co2 according to gdp level
+def show_correlation_pval_plots(column,ymax):
+    divided_by_gdp = divide_across_gdp(3)
+    n_bins = 10
+    colors = ['#2d96ed', '#fa4a37']
+    labels = ['correlation', 'p value']
+
+    correlations = [];
+    p_vals = []
+    for country in divided_by_gdp[2]:
+        correlation = find_correlation(column,8,country)
+        p_val = find_pval(column,8,country)
+        if correlation != None and p_val != None:
+            correlations.append(correlation)
+            p_vals.append(p_val)
+    all_data = [correlations, p_vals]
+
+    plt.figure(figsize=(8,3))
+
+    plt.subplot(1,3,1)
+    plt.title('high gdp countries')
+    plt.xlabel('correlation ' + column_to_meaning(column) + '/co2')
+    plt.ylabel('quantity')
+    plt.axvline(mean(correlations), color='blue', linestyle='dashed', linewidth=1.5)
+    plt.axvline(mean(p_vals), color='red', linestyle='dashed', linewidth=1.5)
+    plt.ylim(0,ymax)
+    plt.xlim((-1,1))
+    plt.hist(all_data, n_bins, density=True, histtype='bar', color=colors, label=labels)
+
+    correlations = [];
+    p_vals = []
+    for country in divided_by_gdp[1]:
+        correlation = find_correlation(column,8,country)
+        p_val = find_pval(column,8,country)
+        if correlation != None and p_val != None:
+            correlations.append(correlation)
+            p_vals.append(p_val)
+    all_data = [correlations, p_vals]
+
+    plt.subplot(1,3,2)
+    plt.title('medium gdp countries')
+    plt.xlabel('correlation ' + column_to_meaning(column) + '/co2')
+    plt.axvline(mean(correlations), color='blue', linestyle='dashed', linewidth=1.5)
+    plt.axvline(mean(p_vals), color='red', linestyle='dashed', linewidth=1.5)
+    plt.ylim(0,ymax)
+    plt.xlim((-1,1))
+    plt.hist(all_data, n_bins, density=True, histtype='bar', color=colors, label=labels)
+
+    correlations = [];
+    p_vals = []
+    for country in divided_by_gdp[0]:
+        correlation = find_correlation(column,8,country)
+        p_val = find_pval(column,8,country)
+        if correlation != None and p_val != None:
+            correlations.append(correlation)
+            p_vals.append(p_val)
+    all_data = [correlations, p_vals]
+
+    plt.subplot(1,3,3)
+    plt.title('low gdp countries')
+    plt.xlabel('correlation ' + column_to_meaning(column) + '/co2')
+    plt.axvline(mean(correlations), color='blue', linestyle='dashed', linewidth=1.5)
+    plt.axvline(mean(p_vals), color='red', linestyle='dashed', linewidth=1.5)
+    plt.ylim(0,ymax)
+    plt.xlim((-1,1))
+    plt.hist(all_data, n_bins, density=True, histtype='bar', color=colors, label=labels)
+    
+
+    plt.show()
 
 #shows correlation between said column and co2 according to gdp level
 def show_correlation_plots(column,ymax):
@@ -522,7 +620,12 @@ def name_to_list(country_name,matrix):
         if item[0] == country_name:
             return item
 
-
+#determines the average differences between a number in prediction and actual lists
+def find_model_score(prediction,actual):
+    total_differences = 0
+    for i in range(len(prediction)):
+        total_differences = total_differences + abs(prediction[i] - actual[i])
+    return total_differences/len(prediction)
         
 #within countries_matrix...
 #column 0 = name
@@ -582,6 +685,9 @@ print('recall score: ' + str(recall))
 print('precision score: ' + str(precision))
 f1 = 2 * (precision * recall) / (precision + recall)
 print('f1 score: ' + str(f1))
+
+model_score = find_model_score(prediction,target_test_data)
+print('average differences between values: ' + str(model_score))
 
 
 #model is fit on all GDP ranges... what if I split up the GDPs though??
@@ -649,6 +755,8 @@ print('recall score: ' + str(recall))
 print('precision score: ' + str(precision))
 f1 = 2 * (precision * recall) / (precision + recall)
 print('f1 score: ' + str(f1))
+model_score = find_model_score(prediction,target_test_data)
+print('average differences between values: ' + str(model_score))
 
 
 #FOR low GDP
@@ -692,6 +800,8 @@ print('recall score: ' + str(recall))
 print('precision score: ' + str(precision))
 f1 = 2 * (precision * recall) / (precision + recall)
 print('f1 score: ' + str(f1))
+model_score = find_model_score(prediction,target_test_data)
+print('average differences between values: ' + str(model_score))
 
 
 
