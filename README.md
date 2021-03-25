@@ -1,5 +1,5 @@
 # world_in_distress
-Check out the blog post! 
+3/19/2021 - Check out the blog post! 
 https://medium.com/@jdregerm/a-world-in-destress-49078641ec6
 
 3/25/2021 - have created new graphs showing p_values along with correlation_values
